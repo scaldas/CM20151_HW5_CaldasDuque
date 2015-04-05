@@ -24,7 +24,7 @@ for line in raw_data:
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
 #Guardamos los minimos pues solo 
-size = 1000
+size = 100
 min_x = min(x_coord)
 min_y = min(y_coord)
 min_z = min(z_coord)
@@ -104,11 +104,23 @@ rho = (1/(delta_x*delta_y*delta_z))*rho
 
 print("FIN")
 
-#NO USAR, puede llegar a crear un archivo de 8 GB
-#print("Inicia Impresion")
-#f = open('resultados.txt', 'w')
-#f.write(rho)
-#f.close
+print(type(rho))
+
+
+with open('rho.csv', 'w', newline='') as f:
+    writer = csv.writer(f)
+    for i in range(0,size):
+    	for j in range(0,size):
+    		writer.writerow('\n')
+    		for k in range(0,size):
+    			writer.writerow(repr(rho[i,j,k])+',')
+
+
+# # NO USAR, puede llegar a crear un archivo de 8 GB
+# # print("Inicia Impresion")
+# # f = open('rho.txt', 'w')
+# # f.write(rho)
+# # f.close
 
 
 
