@@ -34,7 +34,7 @@ for line in raw_data:
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
 #Guardamos los minimos pues solo 
-size = 100
+size = 300
 min_x = min(x_coord)
 min_y = min(y_coord)
 min_z = min(z_coord)
