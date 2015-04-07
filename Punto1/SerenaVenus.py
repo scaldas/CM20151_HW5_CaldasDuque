@@ -27,13 +27,9 @@ for line in raw_data:
 	y_coord.append(float(particle[2]))
 	z_coord.append(float(particle[3]))
 
-#Probamos imprimiendo la informacion de las 5 primeras particulas
-#for i in range(0,5):
-#	print("%f, %f, %f" % (x_coord[i], y_coord[i], z_coord[i]))
 
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
-#Guardamos los minimos pues solo 
 size = 300
 min_x = min(x_coord)
 min_y = min(y_coord)
