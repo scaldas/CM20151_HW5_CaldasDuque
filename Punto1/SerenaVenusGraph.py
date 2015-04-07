@@ -114,29 +114,58 @@ print('Listo')
 
 #1c.
 print('Finalmente se crea la matriz con las fuerzas')
-#La fuerza la calculamos como F= -Grad(U) 
-force = np.gradient(phi)*(-1)
+#La fuerza la calculamos a partir de sus componentes como sqrt(F_x^2+F_y^2+F_z^2)
+#Por ejemplo, la componente en x se calcula como F_x = - dphi/dx
+
+F_x = (phi[1:,:,:] - phi[:-1,:,:])[:,:-1,:-1]/delta_x
+F_y = (phi[:,1:,:] - phi[:,:-1,:])[:-1,:,:-1]/delta_y
+F_z = (phi[:,:,1:] - phi[:,:,:-1])[:-1,:-1,:]/delta_z
+
+F_x = -1*F_x
+F_y = -1*F_y
+F_z = -1*F_z
+
+F = ((F_x**2)+(F_y**2)+(F_z**2))**(0.5)
 print('Listo calisto!!')
 # print(force)
 
-minimos=[]
-while len(minimos) < 150:
-	for i in range(size):
-		for j in range(size):
-			for k in range(size):
-				force[i,j,k]==min(force):
-				minimos.append(force[i,j,k])
-				data=np.delete(force, force[i,j,k])
-print(type(force))		
-# 
-#maximos=[]
-# while len(maximos) < 11:
-# # 	if data[i]==max(data):
-# # 		maximos.append(data[i])
-# # 		data=np.delete(data, data[i])
+#Ahora encontramos el minimo y maximo
+minimo = force.min()
+maximo = force.max()
 
-# print(len(minimos))	
+#Ahora encontramos la posicion del maximo y minimo 
+minindex = numpy.where(force==minimo)
 
+
+
+# miniANDmaxi=[]
+# posicionI=[]
+# posicionJ=[]
+# posicionK=[]
+# while len(miniANDmaxi) < 5:
+# 	for i in range(size):
+# 		for j in range(size):
+# 			for k in range(size):
+# 				force[i,j,k]==force.min():
+# 				miniANDmaxi.append(force[i,j,k])
+# 				posicionI.append(i)
+# 				posicionJ.append(j)
+# 				posicionK.append(k)
+# 				force=np.delete(force, force[i,j,k])
+	
+# # 
+# while len(miniANDmaxi) < 10:
+# 	for i in range(size):
+# 		for j in range(size):
+# 			for k in range(size):
+# 				force[i,j,k]==fprce.max():
+# 				miniANDmaxi.append(force[i,j,k])
+# 				posicionI.append(i)
+# 				posicionJ.append(j)
+# 				posicionK.append(k)
+# 				force=np.delete(force, force[i,j,k])
+
+#Ahora encontramos las posiciones de cada una de las particulas que corresponden a los máximos y a los mínimos 
 # mpl.plot()
 
 
