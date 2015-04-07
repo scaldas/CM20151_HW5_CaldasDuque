@@ -115,14 +115,9 @@ print("Listo")
 #1b. 
 #Se encuentra la transformada inversa de Fourier de phi_gorrito que sabemos que phi_gorrito = -rho_gorrito. 
 #Para esto se asume que rho_gorrito = rho
-<<<<<<< HEAD
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en pánico')
 rho_gorrito= np.fft.fftn(rho)
 phi_gorrito = rho_gorrito*(-1)
-=======
-print('Se comienza a construir la matriz phi. Favor esperar y no entrar en panico')
-phi_gorrito= rho*(-1)
->>>>>>> 7a71007aa0cba16ee68ec9284b174063d9a4579e
 phi = np.fft.ifftn(phi_gorrito)
 print('Listo')
 
