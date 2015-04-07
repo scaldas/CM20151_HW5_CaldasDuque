@@ -40,9 +40,9 @@ delta_y = (max(y_coord) - min_y)/size
 delta_z = (max(z_coord) - min_z)/size
 
 #Imprimimos los delta
-#print("dx = %f" % (delta_x))
-#print("dy = %f" % (delta_y))
-#print("dz = %f" % (delta_z))
+print("dx = %f" % (delta_x))
+print("dy = %f" % (delta_y))
+print("dz = %f" % (delta_z))
 
 print("Inicializa la matriz")
 #Construimos rho
@@ -80,9 +80,9 @@ for i in range(0,len(x_coord)):
 				new_k = k + c
 				
 				if new_i < size and new_j < size and new_k < size and new_i > -1 and new_j > -1 and new_k > -1:
-					x_center = delta_x*(float(new_i) + 1/2)
-					y_center = delta_y*(float(new_j) + 1/2)
-					z_center = delta_z*(float(new_k) + 1/2)
+					x_center = min_x + delta_x*(float(new_i) + 0.5)
+					y_center = min_y + delta_y*(float(new_j) + 0.5)
+					z_center = min_z + delta_z*(float(new_k) + 0.5)
 
 					if abs(x-x_center) < delta_x:
 						W_x = 1 - (abs(x-x_center)/delta_x)
@@ -109,13 +109,20 @@ rho = num_puntos*rho
 rho = (1/(delta_x*delta_y*delta_z))*rho
 
 print("Listo")
+#Imprimimos rho para revisar que no quede en ceros
+#print(rho)
 
 #1b. 
 #Se encuentra la transformada inversa de Fourier de phi_gorrito que sabemos que phi_gorrito = -rho_gorrito. 
 #Para esto se asume que rho_gorrito = rho
+<<<<<<< HEAD
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en pánico')
 rho_gorrito= np.fft.fftn(rho)
 phi_gorrito = rho_gorrito*(-1)
+=======
+print('Se comienza a construir la matriz phi. Favor esperar y no entrar en panico')
+phi_gorrito= rho*(-1)
+>>>>>>> 7a71007aa0cba16ee68ec9284b174063d9a4579e
 phi = np.fft.ifftn(phi_gorrito)
 print('Listo')
 

@@ -1,0 +1,164 @@
+---
+title: "Integracion por Rechazo"
+author: "Carolina Duque y Sebastian Caldas"
+date: "6 de abril de 2015"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(ggplot2)
+```
+
+El metodo del rechazo se utiliza normalmente para obtener _samples_ de distribuciones probabilisticas que resultan dificil de estimar en la practica. A traves de este metodo, es posible resolver integrales del tipo:
+
+$$
+  \begin{aligned}
+  \int h(x) \cdot f(x) dx
+  \end{aligned}
+$$
+
+donde $h(x)$ es una funcion y $f(x)$ una distribucion de probabilidad. Esta es exactamente la expresion para hallar $E[h(x)]$ donde $E$ representa el valor esperado de $f(x)$. Sin embargo, vale la pena recordar que, 
+
+$$
+  \begin{aligned}
+  \int g(x) dx = \int \frac{g(x)}{f(x)} \cdot f(x) dx = \int h(x) \cdot f(x) dx
+  \end{aligned}
+$$
+
+Con $g(x)$ una funcion y $f(x)$ una distribucion de probabilidad positiva. De esta manera el metodo deberia funcionar para todas las integrales. La implementacion propuesta, sin embargo, tendra otras restricciones especificadas mas adelante:
+
+```{r}
+#stocastic_integration retorna tanto el resultado de la integracion numerica como el grafico pedido
+#parametros: 
+#funcion es un objeto function que representa la funcion a integrar
+#lim_inferior y lim_superior son los limites de integracion
+stocastic_integration = function(funcion, lim_inferior, lim_superior, plot) {
+  nsim = 10000;
+  
+  #Los puntos en x se generan aleatoriamente entre los limites de integracion
+  uniform_random_x = runif(nsim, lim_inferior, lim_superior);
+  cota_superior = max(funcion(uniform_random_x)) 
+  
+  #Los puntos en y se generan aleatoriamente entre 0 y el maximo valor de la funcion evaluada en los puntos en x generados
+  uniform_random_y = runif(nsim, 0, cota_superior);
+  
+  accepted = c()
+  confirmed = c()
+  j = 0
+  
+  #Se rechazan todos los puntos que caigan por fuera de la funcion
+  for(i in 1:nsim)
+  {
+    if(uniform_random_y[i] <= funcion(uniform_random_x[i])) 
+    {
+      accepted[i] = 'Yes'
+      confirmed[j] = uniform_random_x[i]
+      j = j+1
+    }
+    else 
+    {
+      accepted[i] = 'No'
+    }
+  }
+  
+  #Se grafican los puntos
+  data_frame = data.frame(x = uniform_random_x, y = uniform_random_y , y2 = funcion(uniform_random_x), accepted = factor(accepted, levels= c('Yes','No')))
+  
+  area_conocida = cota_superior*(lim_superior-lim_inferior)
+  
+  p1 = ggplot(data_frame) +
+    geom_point(aes(x=x, y=y, colour=accepted)) +
+    geom_line(aes(x=x, y=y2)) +
+    ggtitle("Metodo del Rechazo")  
+  #Se obtiene el resultado de la integral recordando que la razon de las areas debe ser igual a la de los puntos.
+  by_rejection = (length(confirmed)/nsim)*area_conocida
+  return(list(by_rejection, p1))
+}
+```
+
+En la funcion anterior se deja atras el formalismo que explica por que funciona este metodo y se generan aleatoriamente puntos con distribucion uniforme en x y en y (se generan las coordenadas por separado). De estos puntos, se descartan aquellos que caerian por fuera de la funcion. Finalmente, se recuerda la proporcion
+
+$$
+  \begin{aligned}
+  \frac{Area Integral}{Area Puntos} = \frac{Puntos Aceptados}{Puntos Totales}
+  \end{aligned}
+$$
+
+para poder calcular $Area Integral$. Ahora, $Area Puntos$ representa el area donde se contienen los puntos aleatorios originales. Esto lleva a que la funcion la calcule como el rectangulo definido por los limites de integracion, el maximo valor de la funcion por parametro (la que se quiere integrar) en ese intervalo, y el eje x. De esta manera, los resultados seran coherentes solo si la funcion que se le pasa por parametro (la que se quiere integrar) es mayor a 0.\
+\
+Probemos entonces la funcion implementada con $(cos(50x) + sin(20x))^2$ entre 0,1 y comparemos sus resultados con aquellos de la funcion _integrate_:
+```{r}
+funcion = function(x){(cos(50*x)+sin(20*x))^2}
+lim_inferior = 0
+lim_superior = 1
+
+results = stocastic_integration(funcion, 0, 1)
+
+```
+
+Con el resultado por rechazo siendo:
+```{r}
+results[[1]]
+```
+Y por integracion:
+```{r}
+integrate(funcion, 0, 1)
+```
+Que dan bastante parecidos, difiriendo en el tercer decimal y a veces en el segundo. Sin embargo, si hay diferencia. Esta podria reducirse aumentando el numero de simulaciones (pero esto aumenta demasiado el tiempo computacional, mas alla de los 10 segundos que un usuario esta normalmente dispuesto a esperar). Tambien puede sacarse un promedio entre muchas ejecuciones de la funcion. Este valor esperado deberia tender al verdadero valor (esto lo dice la teoria en http://www2.imm.dtu.dk/courses/02443/slides2014/integrate_HO.pdf). \
+\
+El grafico que se genera es el siguiente:
+```{r, echo=FALSE}
+results[[2]]
+```
+
+Ahora, para la integral indefinida $\int_2^{\infty} \frac{1}{\pi(1+y^2)}$, es necesario definir un rango significativo de integracion. Se dividio entonces el eje x en intervalos de 50 unidades desde el 2. El rango significativo es aquel conjunto de intervalos sobre los cuales, si se integra, se obtenga un numero que es minimo 1000 veces mayor a la integral sobre el intervalo inmediatamente despues. Es decir, se integrara sobre todos los intervalos hasta que el siguiente 
+sea despreciable. Para hallar el rango significativo se usa la funcion:
+```{r}
+#stocastic_indefinite_interval retorna tanto el limite superior del rango de integracion significativo
+
+stocastic_indefinite_interval <- function(funcion, lim_inferior){
+  paso = 150
+  lim_superior = lim_inferior + paso
+  
+  integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior)
+  integral_intervalo = integral_intervalo[[1]]
+  
+  integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso)
+  integral_proximo_intervalo = integral_proximo_intervalo[[1]]
+  
+  if(integral_intervalo/1000 < integral_proximo_intervalo)
+  {
+    lim_superior = lim_superior + paso
+    
+    integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior)
+    integral_intervalo = integral_intervalo[[1]]
+    
+    integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso)
+    integral_proximo_intervalo = integral_proximo_intervalo[[1]]
+  }
+  
+  return(lim_superior)
+}
+```
+
+Se calcula entonces el valor (aproximado) de la integral y se compara con el dado por _integrate_
+
+```{r}
+funcion = function(x){1/(pi*(1+x^2))}
+lim_inferior = 2
+lim_superior = stocastic_indefinite_interval(funcion,lim_inferior)
+
+results = stocastic_integration(funcion, lim_inferior, lim_superior)
+```
+Con el resultado por rechazo siendo:
+```{r}
+results[[1]]
+```
+Y por integracion:
+```{r}
+integrate(funcion, 2, Inf)
+```
+Que dan nuevamente bastante parecidos (aunque en todas las ejecuciones de prueba se mantuvo el segundo decimal, variando desde el tercero, no es posible afirmar que este siempre sea el caso). El grafico en este caso se muestra a continuacion.
+```{r, echo=FALSE}
+results[[2]]
+```
