@@ -104,7 +104,7 @@ Y por integracion:
 ```{r}
 integrate(funcion, 0, 1)
 ```
-Que dan bastante parecidos. Sin embargo, si hay diferencia. Esta podria reducirse aumentando el numero de simulaciones (pero esto aumenta demasiado el tiempo computacional, mas alla de los 10 segundos que un usuario esta normalmente dispuesto a esperar). Tambien puede sacarse un promedio entre muchas ejecuciones de la funcion. Este valor esperado deberia tender al verdadero valor (esto lo dice la teoria en http://www2.imm.dtu.dk/courses/02443/slides2014/integrate_HO.pdf). \
+Que dan bastante parecidos, difiriendo en el tercer decimal y a veces en el segundo. Sin embargo, si hay diferencia. Esta podria reducirse aumentando el numero de simulaciones (pero esto aumenta demasiado el tiempo computacional, mas alla de los 10 segundos que un usuario esta normalmente dispuesto a esperar). Tambien puede sacarse un promedio entre muchas ejecuciones de la funcion. Este valor esperado deberia tender al verdadero valor (esto lo dice la teoria en http://www2.imm.dtu.dk/courses/02443/slides2014/integrate_HO.pdf). \
 \
 El grafico que se genera es el siguiente:
 ```{r, echo=FALSE}
@@ -158,7 +158,7 @@ Y por integracion:
 ```{r}
 integrate(funcion, 2, Inf)
 ```
-Que dan nuevamente bastante parecidos. El grafico en este caso se muestra a continuacion.
+Que dan nuevamente bastante parecidos (aunque en todas las ejecuciones de prueba se mantuvo el segundo decimal, variando desde el tercero, no es posible afirmar que este siempre sea el caso). El grafico en este caso se muestra a continuacion.
 ```{r, echo=FALSE}
 results[[2]]
 ```
