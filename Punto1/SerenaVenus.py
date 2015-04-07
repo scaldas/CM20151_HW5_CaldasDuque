@@ -18,9 +18,6 @@ for line in raw_data:
 	y_coord.append(float(particle[2]))
 	z_coord.append(float(particle[3]))
 
-#Probamos imprimiendo la informacion de las 5 primeras particulas
-#for i in range(0,5):
-#	print("%f, %f, %f" % (x_coord[i], y_coord[i], z_coord[i]))
 
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
@@ -110,8 +107,9 @@ print("Listo")
 #1b. 
 #Se encuentra la transformada inversa de Fourier de phi_gorrito que sabemos que phi_gorrito = -rho_gorrito. 
 #Para esto se asume que rho_gorrito = rho
-print('Se comienza a construir la matriz phi. Favor esperar y no entrar en panico')
-phi_gorrito= rho*(-1)
+print('Se comienza a construir la matriz phi. Favor esperar y no entrar en pánico')
+rho_gorrito= np.fft.fftn(rho)
+phi_gorrito = rho_gorrito*(-1)
 phi = np.fft.ifftn(phi_gorrito)
 phi = abs(phi)
 print('Listo')

@@ -106,9 +106,11 @@ print("Listo")
 #Se encuentra la transformada inversa de Fourier de phi_gorrito que sabemos que phi_gorrito = -rho_gorrito. 
 #Para esto se asume que rho_gorrito = rho
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en pánico')
-phi_gorrito= rho*(-1)
+rho_gorrito= np.fft.fftn(rho)
+phi_gorrito = rho_gorrito*(-1)
 phi = np.fft.ifftn(phi_gorrito)
 print('Listo')
+
 
 #1c.
 print('Finalmente se crea la matriz con las fuerzas')
@@ -117,15 +119,17 @@ force = np.gradient(phi)*(-1)
 print('Listo calisto!!')
 # print(force)
 
-# minimos=[]
-# while len(minimos) < 150:
-# 	for i in range(size):
-# 		for j in range(size):
-# 			for k in range(size):
-# 				minimos.append(Force[i,j,k])
-# 				data=np.delete(Force, force[i,j,k])
-# print(type(force))		
-# maximos=[]
+minimos=[]
+while len(minimos) < 150:
+	for i in range(size):
+		for j in range(size):
+			for k in range(size):
+				force[i,j,k]==min(force):
+				minimos.append(force[i,j,k])
+				data=np.delete(force, force[i,j,k])
+print(type(force))		
+# 
+#maximos=[]
 # while len(maximos) < 11:
 # # 	if data[i]==max(data):
 # # 		maximos.append(data[i])
