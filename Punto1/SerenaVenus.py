@@ -105,6 +105,8 @@ for i in range(0,len(x_coord)):
 #rho = num_puntos*rho
 rho = (1.0/(delta_x*delta_y*delta_z))*rho
 
+print(rho)
+
 print("Listo")
 #Imprimimos rho para revisar que no quede en ceros
 #print(rho)
@@ -137,7 +139,7 @@ F_z = -1*F_z
 F = ((F_x**2)+(F_y**2)+(F_z**2))**(0.5)
 
 #Imprimimos la fuerza para cersiorarnos que el arreglo no este vacio ni lleno de unos
-#print(F)
+print(F)
 
 print(F.max())
 print(F.min())
