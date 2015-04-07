@@ -3,16 +3,7 @@ import csv, os
 import scipy.fftpack as fftp
 
 
-# #Se lee el archivo de texto creado en el punto anterior
-# with open('rho_gorrito.csv','r') as f:
-# 	raw_data = f.readlines()
-
-# #Se crea un arreglo y se llena con los datos de rho_gorrito
-# data=[]
-# for line in raw_data:
-# 	data.append(line)
-# rho_gorrito= np.array(data)
-
+#Extraemos la informacion del archivo
 with open('Serena-Venus.txt','r') as f:
 	raw_data = f.readlines()
 
@@ -34,7 +25,7 @@ for line in raw_data:
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
 #Guardamos los minimos pues solo 
-size = 300
+size = 100
 min_x = min(x_coord)
 min_y = min(y_coord)
 min_z = min(z_coord)
@@ -44,9 +35,9 @@ delta_y = (max(y_coord) - min_y)/size
 delta_z = (max(z_coord) - min_z)/size
 
 #Imprimimos los delta
-print("dx = %f" % (delta_x))
-print("dy = %f" % (delta_y))
-print("dz = %f" % (delta_z))
+#print("dx = %f" % (delta_x))
+#print("dy = %f" % (delta_y))
+#print("dz = %f" % (delta_z))
 
 print("Inicializa la matriz")
 #Construimos rho
@@ -122,10 +113,19 @@ print("Listo")
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en panico')
 phi_gorrito= rho*(-1)
 phi = np.fft.ifftn(phi_gorrito)
+phi = abs(phi)
 print('Listo')
+#Imprimimos phi para revisar que no haya complejos
+#print(phi)
 
 #1c.
 print('Finalmente se crea la matriz con las fuerzas')
-#La fuerza la calculamos como F= -Grad(U) 
-force = np.gradient(phi)*(-1)
+#La fuerza la calculamos como F = -Grad(U) 
+
+force = np.gradient(phi)
+force = np.asarray(force)
+force = (-1)*force
+
+#Imprimimos la fuerza para cersiorarnos que el arreglo no este vacio
+#print(force)
 print('Listo calisto!!')
