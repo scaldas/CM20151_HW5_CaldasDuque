@@ -114,12 +114,14 @@ print("Listo")
 #Se encuentra la transformada inversa de Fourier de phi_gorrito que sabemos que phi_gorrito = -rho_gorrito. 
 #Para esto se asume que rho_gorrito = rho
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en pánico')
-phi_gorrito= rho*(-1)
+rho_gorrito= np.fft.fftn(rho)
+phi_gorrito = rho_gorrito*(-1)
 phi = np.fft.ifftn(phi_gorrito)
 print('Listo')
 
 #1c.
 print('Finalmente se crea la matriz con las fuerzas')
 #La fuerza la calculamos como F= -Grad(U) 
-force = np.gradient(phi)*(-1)
+force = np.gradient(phi)
+
 print('Listo calisto!!')
