@@ -1,0 +1,8 @@
+ANOTACIONES:
+
+Una matriz 1000x1000x1000 es demasiado grande para las maquinas virtuales en las que trabaja el grupo. Se decidio entonces bajar un orden de magnitud.
+
+Se usa una matriz 100x100x100 pues arroja resultados satisfactorios en un tiempo corto. Una matriz 200x200x200 tambien arroja resultados rapidamente pero genera demasiadas demoras al momento de imprimir y leer los resultados.
+
+Ahora, en el archivo rho.py se define una variable "size" que permite cambiar el tamaño de la matriz. La variable se imprime en y se lee de los archivos de resultados, por lo que solamente es necesario cambiarla en ese archivo.
+

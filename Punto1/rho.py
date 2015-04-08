@@ -22,10 +22,12 @@ for line in raw_data:
 #for i in range(0,5):
 #	print("%f, %f, %f" % (x_coord[i], y_coord[i], z_coord[i]))
 
+#LA VARIABLE SIZE DEFINE EL TAMANIO DE LA MATRIZ Y PUEDE VARIARSE. POR FAVOR LEER LAS ANOTACIONES.
+size = 100
+
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/size
 #Guardamos los minimos pues seran de utilidad mas adelante
-size = 100
 min_x = min(x_coord)
 min_y = min(y_coord)
 min_z = min(z_coord)

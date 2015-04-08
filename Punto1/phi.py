@@ -37,8 +37,12 @@ for line in raw_data[7:]:
 #Sabemos que phi_gorrito = -rho_gorrito. 
 print('Se comienza a construir la matriz phi. Favor esperar y no entrar en panico')
 rho_gorrito= np.fft.fftn(rho)
+#A la transformacion anterior no se le saca la norma ni la parte real pues sera invertida, los complejos no son un problema y asi se conserva toda la informacion
 phi_gorrito = rho_gorrito*(-1)
 phi = np.fft.ifftn(phi_gorrito)
+
+#Se toma la norma de la transformada inversa y no la parte real para no perder informacion de la transformada.
+#La parte imaginaria se toma en cuenta en vez de ser descartada
 phi = abs(phi)
 print('Listo. Comenzando Impresion...')
 
