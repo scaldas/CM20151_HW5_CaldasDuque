@@ -105,7 +105,12 @@ levels = np.linspace(F_proyeccion.min(), F_proyeccion.max(), 10)
 cs = axs[0].contourf(x, y, F_proyeccion, levels=levels, label="Gravitational Force")
 fig.colorbar(cs, ax=axs[0], format="%.0f")
 cs= axs[0].contour(x, y, F_proyeccion, 8, colors='black', linewidth=.5)
+axs[0].set_xlabel('Coordenada x')
+axs[0].set_ylabel('Coordenada y')
+
 cs = axs[1].plot(x_coord, y_coord,'mo', markersize = 1, label="Particles")
 axs[1].set_axis_bgcolor('white')
+axs[1].set_xlabel('Coordenada x')
+axs[1].set_ylabel('Coordenada y')
 
 fig.savefig('plot.png')
