@@ -1,7 +1,10 @@
 import numpy as np 
-import matplotlib as mpl
-import csv
+import csv, os
+import scipy.fftpack as fftp
+import matplotlib.pyplot as plt
 
+
+#Extraemos la informacion del archivo
 with open('Serena-Venus.txt','r') as f:
 	raw_data = f.readlines()
 
@@ -16,13 +19,14 @@ for line in raw_data:
 	y_coord.append(float(particle[2]))
 	z_coord.append(float(particle[3]))
 
+#Probamos imprimiendo la informacion de las 5 primeras particulas
+#for i in range(0,5):
+#	print("%f, %f, %f" % (x_coord[i], y_coord[i], z_coord[i]))
+
 #Calculamos los delta
 #Cada delta se calcula como (maximo - minimo)/1000
-#Guardamos los minimos pues solo 
-
-#El enunciado dice que debe ser de 1000³ sin embargo eso es algo descabellado y python no se puede ejecutar tal función pues no hay
-#tanta memoria. Por esta rázón intentamos con una tamaño menor que es 300, el cual funciona bien. 
-size = 300
+#Guardamos los minimos pues seran de utilidad mas adelante
+size = 100
 min_x = min(x_coord)
 min_y = min(y_coord)
 min_z = min(z_coord)
@@ -36,12 +40,12 @@ delta_z = (max(z_coord) - min_z)/size
 #print("dy = %f" % (delta_y))
 #print("dz = %f" % (delta_z))
 
-print("Inicializa la matriz")
-#Construimos rho
+print('Se comienza a construir la matriz rho')
+#Inicializamos la matriz
 rho = np.zeros((size, size, size))
 num_puntos = np.zeros((size, size, size))
 
-print("Comienza a construir rho")
+#Construimos rho
 for i in range(0,len(x_coord)):
 	x = x_coord[i]
 	y = y_coord[i]
@@ -51,6 +55,7 @@ for i in range(0,len(x_coord)):
 	j = int((y-min_y)/delta_y)
 	k = int((z-min_z)/delta_z)
 
+	#Las particulas que caigan en los limites superiores de la grilla se cuentan en la ultima celda
 	if i == size:
 		i = size - 1
 	if j == size:
@@ -61,45 +66,46 @@ for i in range(0,len(x_coord)):
 	#DUDA!
 	#Sigo sin saber cual masa utilizar
 	#Uso solo la de la celda o la que esta fuera tambien?
-	num_puntos[i,j,k] += 1
+	#num_puntos[i,j,k] += 1
 
+	#Agregamos la particula no solo a la celda en la que se encuentra sino a las adyacentes donde pudiera ser relevante
+	#El algortimo se hace asi para hacerlo mas eficiente
+	#No es posible que una particula afecte una celda que no sea su vecina. Sin embargo, se deben revisar los vecinos en las tres dimensiones
 	for a in range(-1,1):
 		for b in range(-1,1):
 			for c in range(-1,1):
-
 				new_i = i + a
 				new_j = j + b
 				new_k = k + c
 				
+				#Los limites de la grilla tendran algunos vecinos que esten fuera de la grilla
 				if new_i < size and new_j < size and new_k < size and new_i > -1 and new_j > -1 and new_k > -1:
-					x_center = delta_x*(float(new_i) + 1/2)
-					y_center = delta_y*(float(new_j) + 1/2)
-					z_center = delta_z*(float(new_k) + 1/2)
+					x_center = min_x + delta_x*(float(new_i) + 0.5)
+					y_center = min_y + delta_y*(float(new_j) + 0.5)
+					z_center = min_z + delta_z*(float(new_k) + 0.5)
 
 					if abs(x-x_center) < delta_x:
-						W_x = 1 - (abs(x-x_center)/delta_x)
+						W_x = 1.0 - (abs(x-x_center)/delta_x)
 					else:
-						W_x = 0
+						W_x = 0.0
 
 					if abs(y-y_center) < delta_y:
-						W_y = 1 - (abs(y-y_center)/delta_y)
+						W_y = 1.0 - (abs(y-y_center)/delta_y)
 					else:
-						W_y = 0
+						W_y = 0.0
 					
 					if abs(z-z_center) < delta_z:
-						W_z = 1 - (abs(z-z_center)/delta_z)
+						W_z = 1.0 - (abs(z-z_center)/delta_z)
 					else:
-						W_z = 0
+						W_z = 0.0
 
 					rho[new_i,new_j,new_k] += W_x*W_y*W_z
 
 					#Descomentar esta linea si cada nube cuenta en cada celda
 					#if W_x != 0 and W_y != 0 and W_z != 0:
 					#	num_puntos[new_i,new_j,new_k] += 1
-
-rho = num_puntos*rho
-rho = (1/(delta_x*delta_y*delta_z))*rho
-print(rho)
+#rho = num_puntos*rho
+rho = (1.0/(delta_x*delta_y*delta_z))*rho
 print("Listo")
 
 #1b. 
@@ -109,6 +115,7 @@ print('Se comienza a construir la matriz phi. Favor esperar y no entrar en páni
 rho_gorrito= np.fft.fftn(rho)
 phi_gorrito = rho_gorrito*(-1)
 phi = np.fft.ifftn(phi_gorrito)
+phi = abs(phi)
 print('Listo')
 
 
@@ -130,43 +137,42 @@ print('Listo calisto!!')
 # print(force)
 
 #Ahora encontramos el minimo y maximo
-minimo = force.min()
-maximo = force.max()
+minimo = F.min()
+maximo = F.max()
 
 #Ahora encontramos la posicion del maximo y minimo 
-minindex = numpy.where(force==minimo)
+minindex = np.where(F==minimo)
+p_x = (minindex[0] + 0.5)*delta_x + min_x
+p_y = (minindex[1] + 0.5)*delta_y + min_y
+p_z = (minindex[2] + 0.5)*delta_z + min_z
+posicion_min= [p_x, p_y, p_z]
+
+maxindex = np.where(F==maximo)
+p1_x = (maxindex[0]+ 0.5)*delta_x + min_x
+p1_y = (maxindex[1] + 0.5)*delta_y + min_y
+p1_z = (maxindex[2] + 0.5)*delta_z + min_z
+posicion_max= [p1_x, p1_y, p1_z]
+
+#Ahora queremos graficar en un plano 
+F_proyeccion = F[:,:,0]
+for i in range(1, size-1):
+    F_proyeccion = F_proyeccion + F[:,:,i]
+
+fig, axs = plt.subplots(1,2)
+fig.suptitle("Comparación de contornos de la fuerza gravitacional\n y distribución de particulas", fontsize=16)
+x = np.zeros(size-1)
+y = np.zeros(size-1)
+for i in range(0,size-1):
+	x[i] = (2*i+1)*0.5*delta_x + min_x
+	y[i] = (2*i+1)*0.5*delta_y + min_y
+levels = np.linspace(F_proyeccion.min(), F_proyeccion.max(), 10)
+cs = axs[0].contourf(x, y, F_proyeccion, levels=levels, label="Gravitational Force")
+fig.colorbar(cs, ax=axs[0], format="%.0f")
+cs= axs[0].contour(x, y, F_proyeccion, 8, colors='black', linewidth=.5)
+cs = axs[1].plot(x_coord, y_coord,'mo', markersize = 1, label="Particles")
+axs[1].set_axis_bgcolor('white')
 
 
-
-# miniANDmaxi=[]
-# posicionI=[]
-# posicionJ=[]
-# posicionK=[]
-# while len(miniANDmaxi) < 5:
-# 	for i in range(size):
-# 		for j in range(size):
-# 			for k in range(size):
-# 				force[i,j,k]==force.min():
-# 				miniANDmaxi.append(force[i,j,k])
-# 				posicionI.append(i)
-# 				posicionJ.append(j)
-# 				posicionK.append(k)
-# 				force=np.delete(force, force[i,j,k])
-	
-# # 
-# while len(miniANDmaxi) < 10:
-# 	for i in range(size):
-# 		for j in range(size):
-# 			for k in range(size):
-# 				force[i,j,k]==fprce.max():
-# 				miniANDmaxi.append(force[i,j,k])
-# 				posicionI.append(i)
-# 				posicionJ.append(j)
-# 				posicionK.append(k)
-# 				force=np.delete(force, force[i,j,k])
-
-#Ahora encontramos las posiciones de cada una de las particulas que corresponden a los máximos y a los mínimos 
+plt.show()
 # mpl.plot()
-
-
 
