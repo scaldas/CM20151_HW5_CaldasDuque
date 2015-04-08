@@ -32,9 +32,8 @@ Con $g(x)$ una funcion y $f(x)$ una distribucion de probabilidad positiva. De es
 #parametros: 
 #funcion es un objeto function que representa la funcion a integrar
 #lim_inferior y lim_superior son los limites de integracion
-stocastic_integration = function(funcion, lim_inferior, lim_superior, plot) {
-  nsim = 10000;
-  
+#nsims es el numero de simulaciones. Se usara para comprobar el desempe??o de la funcion con respecto a otros metodos
+stocastic_integration = function(funcion, lim_inferior, lim_superior, nsim) {  
   #Los puntos en x se generan aleatoriamente entre los limites de integracion
   uniform_random_x = runif(nsim, lim_inferior, lim_superior);
   cota_superior = max(funcion(uniform_random_x)) 
@@ -92,7 +91,8 @@ funcion = function(x){(cos(50*x)+sin(20*x))^2}
 lim_inferior = 0
 lim_superior = 1
 
-results = stocastic_integration(funcion, 0, 1)
+#Usamos 10000 simulaciones pues el tiempo de computo no es demasiado
+results = stocastic_integration(funcion, 0, 1, 10000)
 
 ```
 
@@ -110,30 +110,60 @@ El grafico que se genera es el siguiente:
 ```{r, echo=FALSE}
 results[[2]]
 ```
+Un mejor analisis de la eficacia de la funcion se aprecia en la siguiente grafica, en la que se muestra el valor absoluto de la diferencia entre el resultado para el metodo del rechazo y el de la funcion _integrate_. Esto se hace para diferente numero de simulaciones, observandose una tendencia a disminuir el error cuando se aumentan las simulaciones:
+```{r, echo=FALSE}
+#Esta chunk es lento, hay que tenerle paciencia
+error = c()
+numsims = c()
 
+integrate = integrate(funcion, 0, 1)
+
+for(j in 1:3)
+{
+  if(j==1){
+    multiplicar = 100
+  }
+  if(j==2){
+    multiplicar = 1000
+  }
+  if(j==3){
+    multiplicar = 10000
+  }
+  for(i in 1:5)
+  {
+    rejection = stocastic_integration(funcion, 0, 1, i*multiplicar)
+    error[3*(j-1)+(i-1)] = abs(rejection[[1]] - integrate[['value']])
+    numsims[3*(j-1)+(i-1)] = i*multiplicar
+  }
+}
+
+data_error = data.frame(num_sims = numsims, error = error)
+ggplot(data_error) + geom_line(aes(x=num_sims, y=error)) + ggtitle("Error Absoluto")  
+```
+\
 Ahora, para la integral indefinida $\int_2^{\infty} \frac{1}{\pi(1+y^2)}$, es necesario definir un rango significativo de integracion. Se dividio entonces el eje x en intervalos de 50 unidades desde el 2. El rango significativo es aquel conjunto de intervalos sobre los cuales, si se integra, se obtenga un numero que es minimo 1000 veces mayor a la integral sobre el intervalo inmediatamente despues. Es decir, se integrara sobre todos los intervalos hasta que el siguiente 
 sea despreciable. Para hallar el rango significativo se usa la funcion:
 ```{r}
 #stocastic_indefinite_interval retorna tanto el limite superior del rango de integracion significativo
 
-stocastic_indefinite_interval <- function(funcion, lim_inferior){
+stocastic_indefinite_interval <- function(funcion, lim_inferior, nsim){
   paso = 150
   lim_superior = lim_inferior + paso
   
-  integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior)
+  integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior, 10000)
   integral_intervalo = integral_intervalo[[1]]
   
-  integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso)
+  integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso, 10000)
   integral_proximo_intervalo = integral_proximo_intervalo[[1]]
   
   if(integral_intervalo/1000 < integral_proximo_intervalo)
   {
     lim_superior = lim_superior + paso
     
-    integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior)
+    integral_intervalo = stocastic_integration(funcion, lim_inferior, lim_superior, 10000)
     integral_intervalo = integral_intervalo[[1]]
     
-    integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso)
+    integral_proximo_intervalo = stocastic_integration(funcion, lim_superior, lim_superior + paso, 10000)
     integral_proximo_intervalo = integral_proximo_intervalo[[1]]
   }
   
@@ -146,9 +176,9 @@ Se calcula entonces el valor (aproximado) de la integral y se compara con el dad
 ```{r}
 funcion = function(x){1/(pi*(1+x^2))}
 lim_inferior = 2
-lim_superior = stocastic_indefinite_interval(funcion,lim_inferior)
+lim_superior = stocastic_indefinite_interval(funcion,lim_inferior,10000)
 
-results = stocastic_integration(funcion, lim_inferior, lim_superior)
+results = stocastic_integration(funcion, lim_inferior, lim_superior,10000)
 ```
 Con el resultado por rechazo siendo:
 ```{r}
@@ -161,4 +191,36 @@ integrate(funcion, 2, Inf)
 Que dan nuevamente bastante parecidos (aunque en todas las ejecuciones de prueba se mantuvo el segundo decimal, variando desde el tercero, no es posible afirmar que este siempre sea el caso). El grafico en este caso se muestra a continuacion.
 ```{r, echo=FALSE}
 results[[2]]
+```
+Finalmente, una vez mas comparamos el error del metodo implementado cuando lo comparamos con _integrate_, observando de nuevo como el error tiende a disminuir al aumentar el numero de simulaciones
+```{r, echo=FALSE}
+#Este chunk es lento, hay que tenerle paciencia, incluso mas que al anterior
+error = c()
+numsims = c()
+
+integrate = integrate(funcion, 0, 1)
+#tomamos un solo limite superior para mejorar la eficiencia del chunk (en verdad es lento)
+lim_superior = stocastic_indefinite_interval(funcion,lim_inferior,10000)
+
+for(j in 1:2)
+{
+  if(j==1){
+    multiplicar = 100
+  }
+  if(j==2){
+    multiplicar = 1000
+  }
+  if(j==3){
+    multiplicar = 10000
+  }
+  for(i in 1:5)
+  {
+    rejection = stocastic_integration(funcion, lim_inferior, lim_superior, i*multiplicar)
+    error[3*(j-1)+(i-1)] = abs(rejection[[1]] - integrate[['value']])
+    numsims[3*(j-1)+(i-1)] = i*multiplicar
+  }
+}
+
+data_error = data.frame(num_sims = numsims, error = error)
+ggplot(data_error) + geom_line(aes(x=num_sims, y=error)) + ggtitle("Error Absoluto")  
 ```
