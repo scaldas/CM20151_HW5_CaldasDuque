@@ -58,22 +58,39 @@ minindex = np.where(F==minimo)
 p_x = (minindex[0] + 0.5)*delta_x + min_x
 p_y = (minindex[1] + 0.5)*delta_y + min_y
 p_z = (minindex[2] + 0.5)*delta_z + min_z
-posicion_min= [p_x, p_y, p_z]
 
 maxindex = np.where(F==maximo)
 p1_x = (maxindex[0]+ 0.5)*delta_x + min_x
 p1_y = (maxindex[1] + 0.5)*delta_y + min_y
 p1_z = (maxindex[2] + 0.5)*delta_z + min_z
-posicion_max= [p1_x, p1_y, p1_z]
 
-print(minimo)
-print(maximo)
+#Imprimimos en pantalla el maximo y minimo globales.
+print('El maximo global de las fuerzas es %f ubicado en la posicion (%f,%f,%f)' % (maximo, p1_x, p1_y, p1_z))
+print('Mientras tanto, el minimo global de las fuerzas es %f ubicado, entre otras, en la posicion (%f,%f,%f)' % (minimo, p_x[0], p_y[0], p_z[0]))
+print('El minimo se halla en muchos otros lugares, pues los puntos se encuentran aglomerados en solo algunos lugares del espacio, haciendo que muchos otros tengan fuerzas insignificantes que se traducen como 0.')
 
-#Ahora queremos graficar en un plano 
+#Ahora queremos graficar en un plano por lo que proyectamos sobre el plano x,y
 F_proyeccion = F[:,:,0]
 for i in range(1, size-1):
     F_proyeccion = F_proyeccion + F[:,:,i]
 
+#Ahora encontramos el minimo y maximo de la proyeccion
+minimo = F_proyeccion.min()
+maximo = F_proyeccion.max()
+
+#Ahora encontramos la posicion del maximo y minimo 
+minindex = np.where(F_proyeccion==minimo)
+p_x = (minindex[0] + 0.5)*delta_x + min_x
+p_y = (minindex[1] + 0.5)*delta_y + min_y
+
+maxindex = np.where(F_proyeccion==maximo)
+p1_x = (maxindex[0]+ 0.5)*delta_x + min_x
+p1_y = (maxindex[1] + 0.5)*delta_y + min_y
+
+#Imprimimos en pantalla el maximo y minimo globales.
+print("**********PARA LA PROYECCION SOBRE XY**********")
+print('El maximo global es %f ubicado en la posicion (entre otras), (%f,%f)' % (maximo, p1_x[0], p1_y[0]))
+print('El minimo global es %f ubicado en la posicion (entre otras), (%f,%f)' % (minimo, p_x[0], p_y[0]))
 
 fig, axs = plt.subplots(1,2)
 plt.figure(figsize=(12,8))
